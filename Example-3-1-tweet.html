@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Web Workers: Pull Tweets and save them in local storage</title>
+    <meta name="author" content="Ido Green">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <style>
+      #result {
+        background: lightblue;
+        padding: 20px;
+        border-radius: 18px;
+      }
+      #tweets {
+        background: yellow;
+        border-radius: 28px;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h1>Web Workers: Pull Tweets and save them in local storage</h1>
+    <article>In this example we used a Web Worker in order to read tweets and save them using localStorage.<br/>
+      Let's have a look how it's working internally by opening Chrome DevTool on the 'Resources' tab.<br/>
+      Then, click on Local Storage and you will see the data of the tweets saved by tweet-id.<br/>
+      For more info: <a href="http://www.w3.org/TR/workers/">www.w3.org/TR/workers</a>
+      <br/>
+      <div id="result"></div>
+      <div id="tweets"></div>
+    </article>
+
+    <script>	
+      console.log("WebWorker: Starting");
+      var worker = new Worker("Worker-pull.js");
+      worker.addEventListener("message", function(e) {  
+        var curTime = new Date();
+        // here we will show the messages between our page and the Worker
+        $('#result').append( curTime + " ) " + e.data + "<br/>"); 
+        var source = e.data[0].source;
+        // in case we have some data from Twitter - let's show it to the user
+        if (typeof source != 'undefined' ) {
+          $("#tweets").append("<ul>");
+          for (var i=0; i < 10; i++) {
+            $("#tweets").append("<li>" + e.data[i].text + " | " +
+              e.data[i].source  + " (" + 
+              e.data[i].created_at + ")</li>"); 
+            saveTweet(e.data[i]);
+          }
+          $("#tweets").append("</ul>");
+        }
+      }, false);  
+      
+      
+      worker.onerror = function(e){
+        throw new Error(e.message + " (" + e.filename + ":" + e.lineno + ")");
+      };
+		
+      // Key - tweet ID
+      // Val - Time tweet created and the text of the tweet.
+      function saveTweet(tweet) {
+        localStorage.setItem(tweet.id_str, "{"+ 
+          "'created': '" + tweet.created_at + "'," +
+          "'tweet-text': '" + tweet.text + "'}");
+      }
+
+      // Get a tweet from our localStorage. we could use sessionStorage if we
+      // wish to have this data just for our session
+      function getTweet(tweetID) {
+        return localStorage.getItem(tweetID); 
+      }
+      
+    </script>
+  </body>
+</html>

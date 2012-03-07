@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Web Worker: Inline worker example</title>
+    <meta name="author" content="Ido Green">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  </head>
+
+  <style>
+    #status {
+      background: lightGreen;
+      border-radius: 15px;
+      padding: 15px;
+	  overflow: auto;
+      height:450px;
+    }
+    article {
+      background: lightsalmon;
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+  </style>
+  
+  <body>
+    <h1>Web Worker: Inline worker example</h1>
+    
+    <article>
+      This is an example for inline worker that we creating 'on the fly' without the need to fetch
+      our JavaScript code of the worker from another file.<br/>
+      It is useful method to create a self-contained page without having to create separate worker file.<br/>
+      With the new BlobBuilder interface, you can "inline" your worker in the same HTML file as your
+      main logic by creating a BlobBuilder and appending the worker code as a string.
+    </article>
+    
+    <div id="status"></div>
+
+    <script id="worker1" type="JavaScript/worker">
+      // This script won't be parsed by JS engines because its type is JavaScript/worker.
+      // We got here some simple code to calculate prime number and send it back to the parent page.
+      self.onmessage = function(e) {
+      self.postMessage("<h3>Worker: Started the calculation</h3><ul>");
+        var n = 1;
+        search: while (n < 500) {
+          n += 1;
+          for (var i = 2; i <= Math.sqrt(n); i += 1)
+            if (n % i == 0)
+              continue search;
+          // found a prime!
+          postMessage("<li>Worker: Found another prime: " + n + "</li>");
+        }
+        postMessage("</ul><h3>Worker: Done</h3>");
+      }
+    </script>
+
+    <script>
+      function status(msg) {
+        $("#status").append(msg);
+      }
+      
+      // Creating the BlobBuilder and adding our Web Worker code to it.
+	  //new BlobBuilder();
+      var bb = new (window.BlobBuilder || window.WebKitBlobBuilder)();       
+      bb.append(document.querySelector('#worker1').textContent);
+
+      // creates a simple URL string which can be used to reference 
+      // data stored in a DOM File / Blob object.
+      // Psss... In Chrome, there's a nice page to view all of the 
+      // created blob URLs: chrome://blob-internals/
+      var worker = new Worker(window.webkitURL.createObjectURL(bb.getBlob()));
+      worker.onmessage = function(e) {
+        // pass the information we got from the worker and print it
+        status(e.data);
+      }
+      worker.postMessage(); // Start the worker.
+    </script>
+  </body>
+</html>

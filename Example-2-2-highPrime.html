@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+ <title>Web Worker: The highest prime number</title>
+</head>
+<style>
+	#result {
+		background-color: yellow;
+		padding: 20px;
+		font-size: 140%;
+	}
+	footer {
+		font-size: 70%;
+		color: red;
+		position: fixed;
+		bottom: 1em;
+		text-align: center;
+	}
+</style>
+<body>
+ <h1>Web Worker: The highest prime number</h1>
+ <article>The highest prime number discovered so far is: 
+	 <output id="result"></output>
+ </article>
+ <script>
+  var worker = new Worker('Example-2-1-highPrime.js');
+  worker.onmessage = function (event) {
+    document.getElementById('result').textContent = event.data;
+  };
+ </script>
+
+ <footer>
+ 	(!) You might want to close this page ASAP in order to save some CPU cycles
+ </footer>
+</body>
+</html>

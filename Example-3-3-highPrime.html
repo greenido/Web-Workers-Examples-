@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+   <title>Web Worker: The highest prime number</title>
+   <!-- Get the latest jQuery code -->
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+   <meta charset=utf-8 />
+ </head>
+ <style>
+   #actions {
+     position: fixed;
+     top: 10px;
+     background: lightBlue;
+     padding:8px;
+   }
+   h1 {
+     position: relative;
+     bottom: 10px;
+     left: 280px;
+   }
+   #status { 
+     position: relative;
+     font-size: 120%;
+     background: darkslategrey;
+     padding: 20px;
+     border-radius: 20px;
+   }
+   article { 
+     position: relative;
+     color:yellow;
+     background: darkgray;
+     padding: 25px; 
+   }
+   input {
+     width: 80px;
+     height: 35px;
+     font-size: 120%;
+   }
+ </style>
+ <body>
+   
+   <h1>Web Worker: The highest prime number</h1>
+   <article>
+    <h2>The prime numbers</h2>
+     <output id="result"></output>
+     <div id="status"></div>
+   </article>
+   <div id="actions">
+     <input type="text" name="upto" id="upto"/>
+     <button onclick="start()" title="Start the work">Start</button>
+     <button onclick="stop()" title="Stop the work and go have a drink">Stop</button>
+   </div>
+   <script>
+     var myWorker;
+
+     function start() {
+       console.log("WebWorker: Starting");
+       myWorker = new Worker("Example-3-4-highPrime.js");
+       myWorker.addEventListener("message", primeHandler, false);
+       var maxNum = $('#upto').val();
+       myWorker.postMessage({'cmd': 'start', 'upto': maxNum});
+     }
+
+     function stop() {
+       if (myWorker) {
+         var msg = "<br/>WebWorker: Terminating " + new Date();
+         console.log(msg);
+         $('#status').append(msg);
+         myWorker.terminate();
+         myWorker = null;
+       }
+     }
+     function primeHandler(event) {
+       console.log ('got e:'+event.data);
+       if (is_numeric(event.data)) {
+         $('#result').append(event.data);
+       }
+       else {
+         // update our status div and remove the " so the text will be clear
+         $('#status').append(JSON.stringify(event.data).replace(/"/g, "") );
+       }
+     }
+
+     function is_numeric(input){
+       return typeof(input)=='number';
+     }
+   </script>
+
+ </body>
+</html>
+

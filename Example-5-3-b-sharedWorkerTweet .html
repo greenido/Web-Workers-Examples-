@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Shared Web Workers: Twitter Example</title>
+    <meta name="author" content="Ido Green">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <style>
+      #result {
+        background: orange;
+        padding: 20px;
+        border-radius: 18px;
+      }
+      #tweets {
+        background: grey;
+        border-radius: 28px;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h1>Shared Web Workers: inner iframe</h1>
+    <nav>
+      <button id="start-button">Start The Shared Worker</button>
+      <button id="stop-button">Stop The Shared Worker</button>
+    </nav>
+    <article>
+      Inner iframe that in the real world could be another tab/window of our web app.
+      <div id="result"></div>
+      <div id="tweets"></div>
+    </article>
+    <script>
+      var worker;
+	
+      function startWorker() {
+        console.log("WebWorker: Starting");
+        worker = new SharedWorker("Example-5-4-sharedWorkerTweet.js");
+        worker.port.addEventListener("message", function(e) {  
+          var curTime = new Date();
+          // here we will show the messages between our page and the shared Worker
+          $('#result').append( curTime + " ) " + e.data + "<br/>"); 
+          var source = e.data[0].source;
+          // in case we have some data from Twitter - let's show it to the user
+          if (typeof source != 'undefined' ) {
+            $("#tweets").append("<ul>");
+            for (var i=0; i < 10; i++) {
+              $("#tweets").append("<li>" + e.data[i].text + " (" +
+                e.data[i].created_at + ")</li>"); 
+            }
+            $("#tweets").append("</ul>");
+          }
+        }, false);  
+        worker.onerror = function(e){
+          throw new Error(e.message + " (" + e.filename + ":" + e.lineno + ")");
+        };
+		
+        worker.port.start();  
+        // post a message to the shared Web Worker  
+        console.log("Calling the worker with @greenido as user");
+        worker.port.postMessage({
+          cmd: "start",
+          user: "greenido"});
+      }
+
+      function stopWorker() {
+        if (worker != undefined) {
+          worker.port.postMessage({ cmd: "stop" });
+          console.log("WebWorker: Stop the party");
+          // You might use worker = null if you wish not to use the worker from now
+        }
+      }
+
+      // when the DOM is ready - attached our 2 actions to the buttons
+      $(function() {
+        $('#start-button').click(function() {
+          startWorker();
+        });
+        $('#stop-button').click(function() {
+          stopWorker();
+        });
+      });
+
+    </script>
+  </body>
+</html>

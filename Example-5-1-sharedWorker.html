@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+   <meta charset="utf-8" />
+   <title>Shared Web Workers: Basic Example</title>
+ </head>
+ <style>
+    #result {
+      position: relative;
+      background: yellow;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 25px;
+    }
+    article {
+      background: lightSalmon;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 25px;
+      width: 440px;
+    }
+  </style>
+ <body>
+   <h1>Shared Web Workers: Basic Example</h1>
+   <article>
+     To create a shared Web Worker, you pass a JavaScript file name to a new instance of the SharedWorker object:
+     <br/>var worker = new SharedWorker("jsworker.js");
+     <br/>
+     Our web shared Web Worker will count the connection and return the data back to our listener in this page. You might want to open the Chrome DevTools in order to see the process.
+     
+   </article>
+   <output id="result"></output>
+
+   <script>
+     var worker = new SharedWorker('Example-5-2-sharedWorker.js');
+
+     worker.port.addEventListener("message", function(e) {  
+       document.getElementById('result').textContent += " | " + e.data;  
+     }, false);  
+
+     worker.port.start();  
+
+     // post a message to the shared Web Worker  
+     console.log("Calling the worker from script section 1");
+     worker.port.postMessage("script-1");
+   </script>
+
+   <script>
+     // This new script block might be found on separate tab/window
+     // of our web app. Here it’s just for the example on the same page.
+     console.log("Calling the worker from script section 2");
+     worker.port.postMessage("script-2");
+   </script>
+ </body>
+</html>
