@@ -49,12 +49,21 @@
           var source = e.data[0].source;
           // in case we have some data from Twitter - let's show it to the user
           if (typeof source != 'undefined' ) {
-            $("#tweets").append("<ul>");
+            var tweets = document.createElement("ul");
             for (var i=0; i < 10; i++) {
-              $("#tweets").append("<li>" + e.data[i].text + " (" +
-                e.data[i].created_at + ")</li>"); //data.source  created_at
+              if (typeof e.data[i] != 'undefined' &&
+                    e.data[i].text != 'undefined') {
+                var tweetTextItem = document.createElement("li");
+                var tweetText = document.createTextNode(e.data[i].text + " | " +
+                   e.data[i].source  + " (" + 
+                   e.data[i].created_at + ")" ) ;
+                tweetTextItem.appendChild(tweetText);
+                tweets.appendChild(tweetTextItem);
+              }
             }
-            $("#tweets").append("</ul>");
+            // update the DOM outside our loop so it will be efficient action
+            console.log("WebWorker: Updated the DOM with Tweets");
+            $("#tweets").append(tweets); 
           }
           // just to help us analyze what we got as data form the shared worker
           console.log ("msg we got back: "+ JSON.stringify(e));

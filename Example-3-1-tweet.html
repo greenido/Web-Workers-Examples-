@@ -33,7 +33,7 @@
 
     <script>	
       console.log("WebWorker: Starting");
-      var worker = new Worker("Worker-pull.js");
+      var worker = new Worker("Example-3-2-tweet.js");
       worker.addEventListener("message", function(e) {  
         var curTime = new Date();
         // here we will show the messages between our page and the Worker
@@ -41,14 +41,23 @@
         var source = e.data[0].source;
         // in case we have some data from Twitter - let's show it to the user
         if (typeof source != 'undefined' ) {
-          $("#tweets").append("<ul>");
+          var tweets = document.createElement("ul");
           for (var i=0; i < 10; i++) {
-            $("#tweets").append("<li>" + e.data[i].text + " | " +
-              e.data[i].source  + " (" + 
-              e.data[i].created_at + ")</li>"); 
-            saveTweet(e.data[i]);
+            if (typeof e.data[i] != 'undefined' &&
+                       e.data[i].text != 'undefined') {
+              var tweetTextItem = document.createElement("li");
+              var tweetText = document.createTextNode(e.data[i].text + " | " +
+                 e.data[i].source  + " (" + 
+                 e.data[i].created_at + ")" ) ;
+              tweetTextItem.appendChild(tweetText);
+              tweets.appendChild(tweetTextItem);
+              saveTweet(e.data[i]);
+            }
           }
-          $("#tweets").append("</ul>");
+          // update the DOM outside our loop so it will be efficient
+          console.log("WebWorker: Updated the DOM with Tweets");
+          $("#tweets").append(tweets);   
+
         }
       }, false);  
       
