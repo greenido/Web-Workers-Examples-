@@ -61,19 +61,20 @@
       
       // Creating the BlobBuilder and adding our Web Worker code to it.
 	  //new BlobBuilder();
-      var bb = new (window.BlobBuilder || window.WebKitBlobBuilder)();       
+      var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder )();       
       bb.append(document.querySelector('#worker1').textContent);
 
       // creates a simple URL string which can be used to reference 
       // data stored in a DOM File / Blob object.
       // Psss... In Chrome, there's a nice page to view all of the 
       // created blob URLs: chrome://blob-internals/
-      var worker = new Worker(window.webkitURL.createObjectURL(bb.getBlob()));
+      var objUrl = (window.webkitURL || window.URL);
+      var worker = new Worker(objUrl.createObjectURL(bb.getBlob()));
       worker.onmessage = function(e) {
         // pass the information we got from the worker and print it
         status(e.data);
       }
-      worker.postMessage(); // Start the worker.
+      worker.postMessage("Go"); // Start the worker.
     </script>
   </body>
 </html>
