@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+<title>Big Data In Worker Example</title>
+
+<style>
+body {
+  padding: 2em;
+}
+
+#result {
+  max-height: 500px;
+  overflow: auto;
+}
+</style>
+<body>
+
+<h1>Big Data (using transferable objects) In Web Worker Example</h1>
+<details>
+  <summary>What is 'Big Data' and Web Worker got to do with each other?</summary>
+  <div>
+    TODO...
+    <p>This demo illustrates <a href="http://dev.w3.org/html5/spec/common-dom-interfaces.html#transferable-objects" target="_blank">transferable objects</a>.
+    Transferable objects are objects that are not copied (e.g. using something like <a href="http://updates.html5rocks.com/2011/09/Workers-ArrayBuffer" target="_blank">structured cloning</a>).
+    Instead, the data is transferred from one context to another. The 'version' from the calling context is no longer available once transferred
+    to the new context. For example, when transferring an <code>ArrayBuffer</code> from main app to Worker, the
+    original <code>ArrayBuffer</code> from the main thread is cleared and no longer usable.
+    This vastly improves performance of sending data to a Worker. </p>
+    <p>This demo sends a 32MB <code>ArrayBuffer</code> to a worker and back using a prefixed version of <code>postMessage()</code>
+    that supports transferable objects: <code><a href="http://dev.w3.org/html5/workers/#dedicated-workers-and-the-dedicatedworkerglobalscope-interface" target="_blank">webkitPostMessage()</a></code>.
+    If your browser doesn't support transferables, the sample falls back to old-skool structured cloning.</p>
+    <p><b>Support:</b> Chrome Dev Channel 17+</p>
+  </div>
+</details>
+
+<section>
+  <p><a href="http://dev.w3.org/html5/spec/common-dom-interfaces.html#transferable-objects" target="_blank">Transferable Objects</a> are lightning fast! The prefixed <code>[window|worker].webkitPostMessage()</code>
+  now supports sending an <code>ArrayBuffer</code> as a transferable.</p>
+  <button onclick="test(true);">Run test with transferable objects</button>
+  <button onclick="test(false);">Run test with COPY of objects</button>
+  
+  <pre id="result"></pre>
+</section>
+
+<script>
+// set some constants/vars
+var SIZE = 1024 * 1024 * 32; // 32MB for our data
+var arrayBuffer = null;
+var uInt8View = null;
+var originalLength = null;
+
+// build our example array of 32MB numbers
+// later in the worker we will work on them with some simple math operations
+function setupArray() {
+  arrayBuffer = new ArrayBuffer(SIZE);
+  uInt8View = new Uint8Array(arrayBuffer);
+  originalLength = uInt8View.length;
+
+  for (var i = 0; i < originalLength; ++i) {
+    uInt8View[i] = i;
+  }
+
+  log(source() + 'filled ' + toMB(originalLength) + ' MB buffer');
+}
+
+//
+// helper functions to measure performance
+//
+
+// return time stemp
+function time() {
+  var now = new Date();
+  var time = /(\d+:\d+:\d+)/.exec(now)[0] + ':';
+  for (var ms = String(now.getMilliseconds()), i = ms.length - 3; i < 0; ++i) {
+    time += '0';
+  }
+  return time + ms;
+}
+
+// We are now our page (on the worker will have some nice RED color for the answers)
+function source() {
+    return '<span style="color:green;">Our page:</span> ';
+}
+
+function seconds(since) {
+  return (new Date() - since) / 1000.0;
+}
+
+function toMB(bytes) {
+  return Math.round(bytes / 1024 / 1024);
+}
+
+//
+// Initial
+var worker = null;
+var startTime = 0;
+var supported = false;
+
+// Move output panel down further if <details> isn't supported (collapsible).
+var details = document.querySelector('details');
+if (!('open' in details)) {
+  document.querySelector('section').classList.add('down');
+}
+
+function log(str) {
+  var elem = document.getElementById('result');
+  var log = function(s) {
+   elem.innerHTML += ''.concat(time(), ' ', s, '\n');
+  };
+  log(str);
+}
+
+function init() {
+  worker = new Worker('Example-6-1-BIG_data_worker.js');
+
+  // Take care of vendor prefixes.
+  worker.postMessage = worker.webkitPostMessage || worker.postMessage;
+
+  worker.onmessage = function(e) {
+    console.timeEnd('actual postMessage round trip was');
+    // capture elapsed time since the original postMessage();
+    if (!e.data.type) {
+      var elapsed = seconds(startTime);
+    }
+
+    var data = e.data;
+
+    if (data.type && data.type == 'debug') {
+      log(data.msg);
+    } else {
+      if (data.copy) {
+        data.byteLength = data.ourArray.byteLength;
+      }
+      var rate = Math.round(toMB(data.byteLength) / elapsed);
+      log(source() + 'postMessage roundtrip took: ' + (elapsed * 1000) + ' ms');
+      log(source() + 'postMessage roundtrip rate: ' + rate + ' MB/s');
+    }
+  };
+
+  log(source() + 'We are good to go!');
+}
+
+function test(useIt) {
+  var useTransferrable = useIt;
+  setupArray(); // Need to do this on every run for the repeated runs with transferable arrays. They're cleared out after they're transferred.
+
+  startTime = new Date();
+  console.time('actual postMessage round trip was');
+
+  if (useTransferrable ) {
+    console.log ("## Using Transferrable object method on size: " + uInt8View.length);
+    worker.postMessage(uInt8View.buffer, [uInt8View.buffer]);
+  } else {
+    console.log ("## Using old COPY method on size: "+ uInt8View.length);
+    worker.postMessage({'copy': 'true', 'ourArray': uInt8View.buffer}); //uInt8View.buffer
+  }
+}
+
+window.addEventListener('load', function(e) {
+  init();
+}, false);
+
+</script>
+
+<!--[if IE]>
+<script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+<script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body>
+</html>

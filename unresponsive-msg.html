@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+ <title>Get the unresponsive message</title>
+</head>
+<style>
+	#result {
+		background-color: yellow;
+		padding: 20px;
+		font-size: 140%;
+	}
+	footer {
+		font-size: 70%;
+		color: red;
+		position: fixed;
+		bottom: 1em;
+		text-align: center;
+	}
+</style>
+
+
+<body>
+ <h1>Get the unresponsive message</h1>
+ <article>The highest prime number discovered so far is: 
+	 <output id="result"></output>
+ </article>
+ 
+
+ <footer>
+ 	(!) When you get the unresponsive message you know we won...
+ </footer>
+
+ <script>
+var n = 1;
+search: while (true) {
+ n += 1;
+ for (var i = 2; i <= Math.sqrt(n); i += 1) {
+   if (n % i == 0) {
+    continue search;
+   }
+ }
+ // found a prime - update the dom
+ document.getElementById('result').textContent = n;
+}
+ </script>
+
+
+</body>
+</html>
