@@ -1,6 +1,6 @@
 Web Workers Examples
 ======================
-[More inforamtion on my blog: http://greenido.wordpress.com/tag/webworker/
+Detailed inforamtion on my blog: http://greenido.wordpress.com/tag/webworker/
 
 What is it?
 =============
