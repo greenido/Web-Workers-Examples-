@@ -9,5 +9,5 @@ Please feel free to let me know if you have some other good/simple examples and 
 
 Feedback
 ==========
-In case you find some bug and/or have suggestions - please feel free to ping me on (http://plus.ly/greenido]) or at @greenido
+In case you find some bug and/or have suggestions - please feel free to ping me on (http://plus.google.com/+greenido]) or at [@greenido](http://twitter.com/greenido)
 Be strong.
