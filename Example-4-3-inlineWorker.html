@@ -22,10 +22,10 @@
       margin-bottom: 15px;
     }
   </style>
-  
+
   <body>
     <h1>Web Worker: Inline worker example</h1>
-    
+
     <article>
       This is an example for inline worker that we creating 'on the fly' without the need to fetch
       our JavaScript code of the worker from another file.<br/>
@@ -33,7 +33,7 @@
       With the new BlobBuilder interface, you can "inline" your worker in the same HTML file as your
       main logic by creating a BlobBuilder and appending the worker code as a string.
     </article>
-    
+
     <div id="status"></div>
 
     <script id="worker1" type="JavaScript/worker">
@@ -58,18 +58,16 @@
       function status(msg) {
         $("#status").append(msg);
       }
-      
-      // Creating the BlobBuilder and adding our Web Worker code to it.
-	  //new BlobBuilder();
-      var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder )();       
-      bb.append(document.querySelector('#worker1').textContent);
 
-      // creates a simple URL string which can be used to reference 
+      // Creating the Blob and adding our Web Worker code to it.
+      var blob = new Blob([document.querySelector('#worker1').textContent]);
+
+      // creates a simple URL string which can be used to reference
       // data stored in a DOM File / Blob object.
-      // Psss... In Chrome, there's a nice page to view all of the 
+      // Psss... In Chrome, there's a nice page to view all of the
       // created blob URLs: chrome://blob-internals/
       var objUrl = (window.webkitURL || window.URL);
-      var worker = new Worker(objUrl.createObjectURL(bb.getBlob()));
+      var worker = new Worker(objUrl.createObjectURL(blob);
       worker.onmessage = function(e) {
         // pass the information we got from the worker and print it
         status(e.data);
