@@ -11,3 +11,6 @@ Feedback
 ==========
 In case you find some bug and/or have suggestions - please feel free to ping me on [+GreenIdo](http://plus.google.com/+greenido) or [@greenido](http://twitter.com/greenido)
 Be strong.
+
+
+[![Analytics](https://ga-beacon.appspot.com/UA-65622529-1/Web-Workers-Examples-/main)](https://github.com/igrigorik/ga-beacon)
